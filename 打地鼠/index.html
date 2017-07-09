@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html>
+	<head>
+		<meta charset="utf-8" />
+		<title></title>
+		<meta name="viewport" content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no" />
+	</head>
+	<body>
+		<!--
+			一、分三个页面
+			开始页：
+			1、背景-封面
+			2、开始按钮---点击切换到第二个页面
+			
+			游戏页：
+			1、倒计时3秒
+			2、游戏开始，30秒游戏时间
+			游戏每隔1秒钟，随机地洞里面出来一个地鼠，1秒钟的时间，去打击这个地鼠
+			击中一次地鼠，得100分，重复击中无效。
+			结束后，弹出1个结束框，结束框有这个总得分，有重新开始按钮
+		-->
+		<div class="loadingPage">
+			<div class="loading">
+				<div class="loadingBar"></div>
+			</div>
+		</div>
+		<style type="text/css">
+			*{
+				margin: 0;
+				padding: 0;
+			}
+			
+			.loadingPage{
+				width: 100%;
+				height: 100%;
+				position: absolute;
+				top: 0;
+				left: 0;
+				background: whitesmoke;
+			}
+			.loading{
+				height: 30px;
+				width: 80%;
+				margin:150px auto;
+				background: gainsboro;
+			}
+			.loadingBar{
+				height: 30px;
+				width: 0%;
+				background: deepskyblue;
+			}
+		</style>
+		<script type="text/javascript">
+			var imgArr = ["img/00.jpg","img/000.jpg","img/01.jpg","img/02.jpg","img/11.png","img/dds.png","img/dsbg.jpg","img/endbg.jpg"];
+			var rate = 0;
+			for(var i=0;i<imgArr.length;i++){
+				(function(y){
+					var img = new Image();
+					img.src = imgArr[y];
+					img.onload = function(){
+						rate++;
+						var num = rate/imgArr.length;
+						document.querySelector(".loadingBar").style.width = num*100+"%";
+						console.log(rate/imgArr.length);
+						if(num ==1){
+							document.querySelector(".loadingPage").style.display = "none";
+						}
+					}
+				}(i));
+			}
+			/*window.onload = function(){
+				document.querySelector(".loadingPage").style.display = "none";
+			}*/
+		</script>
+		
+		
+		
+		<style type="text/css">
+			.square{
+				width: 400px;
+				margin: 0 auto;
+				
+			}
+			.square div{
+				width: 25%;
+				display: inline-block;
+				float: left;
+				font-size: 0;
+
+			}
+			.square div img{
+				width: 100%;
+			}
+		</style>
+		<script src="js/angular.min.js" type="text/javascript" charset="utf-8"></script>
+		<div class="" ng-app="app" ng-controller="all">
+			<div id="" ng-controller="game">
+				<div class="square" ng-class="" ng-style="">
+					<div id="" ng-repeat="x in dsArr"><img ng-src="{{x.imgSrc}}" ng-click="clickMouse($event)" /></div>
+				</div>
+			</div>
+			
+			
+			<div class="" ng-controller="startGame">
+				<div class="" ng-click="startGame()">
+					开始游戏
+				</div>
+			</div>
+			
+		</div>
+		
+		
+		
+		<script type="text/javascript">
+			(function(window,angular){
+				var app = angular.module("app",[]);
+				
+				app.controller("all",function($scope){
+					$scope.$on("startGame",function(event,data){
+						$scope.$broadcast("allStart",data);
+					})
+				})
+				
+				
+				
+				
+				app.controller("game",function($scope,$interval,$timeout){
+					$scope.startGame = false;
+					$scope.endGame = false;
+					
+					$scope.score = 0//计算得分
+					$scope.clickAble = true;
+					var time = "";
+					
+					
+					$scope.dsArr = [];
+					
+					
+					
+					
+					
+					for(var i=0;i<16;i++){
+						$scope.dsArr.push({
+							id:i,
+							imgSrc:"img/00.jpg",
+							state:false
+						})
+					};
+					
+					$scope.clickMouse = function($event){
+						if(angular.element($event.target).attr("src")=="img/01.jpg"&&$scope.clickAble){
+							$scope.score +=100;
+							$scope.clickAble = false;
+							//console.log($scope.score);
+							angular.element($event.target).attr("src","img/02.jpg");
+						}
+						
+						
+					}
+					
+					
+					$scope.$on("allStart",function(event,data){
+						$scope.startGame = data;
+					});
+					
+					$scope.$watch("startGame",function(newValue,oldValue){
+						if($scope.startGame){
+							time = $interval(function(){
+								interGame();
+							},1000)
+							$timeout(function(){
+								$interval.cancel(time);
+								$scope.startGame = false;
+								alert("你的总得分"+$scope.score) 
+								$scope.score = 0;
+							},10000)
+						}
+						
+						//console.log(newValue);
+						
+					})
+					var interGame = function(){
+						var num = parseInt(Math.random()*16);
+						$scope.dsArr[num].imgSrc="img/01.jpg";
+						$timeout(function(){
+							$scope.dsArr[num].imgSrc="img/00.jpg";
+							$scope.clickAble = true;
+						},1000)
+					}
+					
+				})
+				
+				
+				
+				
+				app.controller("startGame",function($scope){
+					$scope.startGame = function(){
+						$scope.$emit("startGame",true)
+					}
+				})
+				
+			})(window,angular)
+		</script>
+		
+		
+		
+	</body>
+</html>
